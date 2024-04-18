@@ -1,0 +1,30 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '(:local-time) :silent t)
+  )
+
+(defpackage :ros.script.cl-peg-calendar.3922209404
+  (:use :cl))
+(in-package :ros.script.cl-peg-calendar.3922209404)
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (let* ((current-year (if (parse-integer (first argv)) (parse-integer (first argv)) (local-time:timestamp-year (local-time:now))))
+         (first-of-the-year-timestamp (local-time:encode-timestamp 0 0 0 0 1 1 current-year)))
+    (progn
+  (dotimes (month 12)
+    (let* ((iterate-month-timestamp (local-time:adjust-timestamp first-of-the-year-timestamp (local-time::offset :month month)))
+           (delta-day (- 7 (local-time:timestamp-day-of-week iterate-month-timestamp)))
+           (first-sunday (local-time:adjust-timestamp iterate-month-timestamp (local-time::offset :day delta-day))))
+      (progn
+        #+(or)(format t "~A~%" (local-time:adjust-timestamp first-of-the-year-timestamp (local-time::offset :month month)))
+        (let ((fmt-string (if (= (mod (1+ month) 2) 0) "~A " "~A")))
+        (format t fmt-string (local-time:timestamp-day first-sunday)))
+        #+(or)(format t "First Sunday Day: ~A~%" (local-time:timestamp-day first-sunday)))))
+  (format t "~%"))))
+;;; vim: set ft=lisp lisp:
